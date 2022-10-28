@@ -164,26 +164,3 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 
 	return nil
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
