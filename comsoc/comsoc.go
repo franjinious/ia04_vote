@@ -1,11 +1,13 @@
 //
-// Created by hongzhe on 22-10-3.
 // Implémentation des fonctions de base du serveur web de vote.
 //
 
 package comsoc
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Alternative int // Candidat
 type Profile [][]Alternative // Profile du tous les candidats, Profile[I][J] représente le Jième candidat préféré du Ième votant
@@ -96,9 +98,13 @@ func checkProfile(prefs Profile) error {
 		set[j] = true
 	}
 
-	// Pour chaque votant, déterminez s'il y a des membres en double
+	fmt.Println(set)
+	// Pour chaque votant, déterminez s'il y a des membres en plusieurs
 	for i := 1; i < len(prefs); i++ {
-		set_temp := set
+		set_temp := make(map[Alternative]bool)
+		for k,p := range set {
+			set_temp[k] = p
+		}
 		for _,j := range prefs[i] {
 			if set_temp[j] == false {
 				return errors.New("Pas le seul candidat dans une préférence!")
@@ -163,4 +169,68 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 	}
 
 	return nil
+}
+
+/**
+ * Distance_edit
+ * @Description: Calculer la distance d'édition de deux préférences
+ * @param a1: première préférence
+ * @param a2: deuxième préférence
+ * @return ans: distance
+ * @return e: erreurs possibles
+ */
+func Distance_edit(a1 []Alternative, a2 []Alternative) (ans int, e error) {
+	if len(a1) != len(a2) {
+		return -1, errors.New("taille de deux préférence n'est pas meme")
+	}
+	ans = 0
+	for i := 0; i < len(a1); i++ {
+		if a1[i] != a2[i] {
+			ans++
+		}
+	}
+	return ans, nil
+}
+
+/**
+ * Distance_edit_somme
+ * @Description: Calculer la somme des distances d'édition entre un préférence et un profile
+ * @param a1: préférence
+ * @param a2: profile
+ * @return ans: somme de distances
+ * @return e: erreurs possibles
+ */
+func Distance_edit_somme(a1 []Alternative, p Profile) (ans int, e error) {
+	e = checkProfile(p)
+	if e != nil {
+		return -1,e
+	}
+	ans = 0
+	for j := range p {
+		a, _ := Distance_edit(a1, p[j])
+		ans += a
+	}
+	return ans, nil
+}
+
+/**
+ * permute
+ * @Description: Générer une permutation complète
+ * @param nums: slice de Alternatives
+ * @return [][]Alternative: permutation complète
+ */
+func Permute(nums []Alternative) [][]Alternative {
+	var ans [][]Alternative
+	var dfs func(l []Alternative, temp []Alternative)
+	dfs = func(l []Alternative, temp []Alternative) {
+		if len(l) == 0 {
+			ans = append(ans, temp)
+		}
+		for i := 0; i < len(l); i++ {
+			n := append([]Alternative{}, l...)
+			dfs(append(n[:i], n[i+1:]...), append(temp, l[i]))
+		}
+	}
+	dfs(nums, []Alternative{})
+	return ans
 }
