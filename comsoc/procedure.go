@@ -395,8 +395,8 @@ func CoombsSWF(p Profile) (count Count, err error) {
 	return count, nil
 }
 
-func Coombs(p Profile) (bestAlts []Alternative, err error) {
-	c, err := Coombs(p)
+func CoombsSCF(p Profile) (bestAlts []Alternative, err error) {
+	c, err := CoombsSWF(p)
 	if err != nil {
 		return nil, err
 	}
@@ -514,6 +514,41 @@ func Kemeny(p Profile) (ans []Alternative, e error) {
 	}
 
 	return ans, nil
+}
+
+func SinglePeakSWF(p Profile) (count Count, err error) {
+	for i := range p {
+		order_inf := make([]Alternative, 0)
+		order_sup := make([]Alternative, 0)
+		med := p[i][0]
+		order_sup = append(order_sup, med)
+		order_inf = append(order_inf, med)
+		for j := i + 1; j < len(p[i]); j++ {
+			if p[i][j] < med {
+				order_inf = append(order_inf, p[i][j])
+			} else {
+				order_sup = append(order_sup, p[i][j])
+			}
+		}
+		for k := 0; k < len(order_sup)-1; k++ {
+			if order_sup[k] < order_sup[k+1] {
+				return nil, errors.New("Pas Single-Peaked")
+			}
+		}
+		for k := 0; k < len(order_inf)-1; k++ {
+			if order_inf[k] < order_inf[k+1] {
+				return nil, errors.New("Pas Single-Peaked")
+			}
+		}
+	}
+
+	for _, value := range p[0] {
+		count[value] = 0
+	}
+	for i := range p {
+		count[p[i][0]]++
+	}
+	return count, nil
 }
 
 //
