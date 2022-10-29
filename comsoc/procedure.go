@@ -58,7 +58,6 @@ func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
 	ans := make([]Alternative, 0)
 	max_v := len(p[0]) - 1
 
-
 	for i, j := range count {
 		if j == max_v {
 			ans = append(ans, i)
@@ -186,6 +185,79 @@ func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error
 		bestAlts = maxCount(count)
 	} else {
 		return nil, e
+	}
+	return bestAlts, nil
+}
+
+/**
+ * KramerSimpsonSWF
+ * @Description: SWF règle de KramerSimpson
+ * @param p: un paramètre type Profile
+ * @return Count: un paramètre type Count
+ * @return error: erreurs possibles
+ */
+
+func KramerSimpsonSWF(p Profile) (Count, error) {
+	note := make([]Alternative, 0)
+	count := make(Count)
+	for i := range p[0] {
+		note = append(note, p[0][i])
+	}
+	for _, value := range note {
+		count[value] = 0
+	}
+	for i := 0; i < len(note); i++ { //Comparer les voix du candidat i et du candidat j
+		for j := i + 1; j < len(note); j++ {
+			a := 0
+			b := 0
+			for k := range p {
+				index_1 := -1
+				index_2 := -1
+				for t := range p[k] {
+					if p[k][t] == note[i] {
+						index_1 = t
+					}
+					if p[k][t] == note[j] {
+						index_2 = t
+					}
+				}
+				if index_1 < index_2 {
+					a++ // On augmente la valeur de a par 1 si le candidat i est préféré que le candidat j
+				}
+				if index_1 > index_2 {
+					b++ // On augmente la valeur de b par 1 si le candidat j est préféré que le candidat i
+				}
+			}
+			//Mise à jour de la note de chaque candidat : on choisit le minimum
+			if count[note[i]] == 0 {
+				count[note[i]] = a
+			} else if count[note[i]] < a {
+				count[note[i]] = a
+			}
+
+			if count[note[j]] == 0 {
+				count[note[j]] = b
+			} else if count[note[j]] < b {
+				count[note[j]] = b
+			}
+
+		}
+
+	}
+	return count, nil
+}
+
+func KramerSimpsonSCF(p Profile) (bestAlts []Alternative, err error) {
+	min := -1
+	count, err := KramerSimpsonSWF(p)
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range count {
+		if value < min {
+			min = value
+			bestAlts = append(bestAlts, key)
+		}
 	}
 	return bestAlts, nil
 }
@@ -418,26 +490,26 @@ func SWFFactory(s func(p Profile) (Count, error), t func([]Alternative) (Alterna
 		}
 
 		type candi struct {
-			a Alternative
+			a     Alternative
 			score int
 		}
 
-		note := make([]candi,0)
+		note := make([]candi, 0)
 
 		for i, j := range temp {
-			n := candi{i,j}
+			n := candi{i, j}
 			note = append(note, n)
 		}
 
 		sort.Slice(note, func(i, j int) bool {
-			l := []Alternative{note[i].a,note[j].a}
-			pre,_ := t(l)
-			return note[i].score > note[j].score ||(note[i].score == note[j].score && pre == note[i].a )
+			l := []Alternative{note[i].a, note[j].a}
+			pre, _ := t(l)
+			return note[i].score > note[j].score || (note[i].score == note[j].score && pre == note[i].a)
 		})
 
-		ans := make([]Alternative,0)
+		ans := make([]Alternative, 0)
 		for _, j := range note {
-			ans = append(ans,j.a)
+			ans = append(ans, j.a)
 		}
 
 		return ans, nil
