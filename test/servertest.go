@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func test_newballot(){
+func Test_newballot(){
 	time.Sleep(2*time.Second)
 	s1 := []string{"ag_id1","ag_id2","ag_id3"}
 	g := sponsoragent.Sponsorinfo{"majority","Mon Jan 15:04:05 UTC 2006",s1,3}
