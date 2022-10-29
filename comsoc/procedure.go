@@ -395,6 +395,13 @@ func CoombsSWF(p Profile) (count Count, err error) {
 	return count, nil
 }
 
+/**
+ * CoombsSCF
+ * @Description: STV Coombs SCF
+ * @param p: un paramètre type Profile
+ * @return bestAlts: slice de gagnants
+ * @return err: erreurs possibles
+ */
 func CoombsSCF(p Profile) (bestAlts []Alternative, err error) {
 	c, err := CoombsSWF(p)
 	if err != nil {
