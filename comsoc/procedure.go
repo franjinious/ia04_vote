@@ -247,6 +247,13 @@ func KramerSimpsonSWF(p Profile) (Count, error) {
 	return count, nil
 }
 
+/**
+ * KramerSimpsonSCF
+ * @Description: SCF KramerSimpson
+ * @param p: un paramètre type Profile
+ * @return bestAlts: slice du gagnant
+ * @return err: erreurs possibles
+ */
 func KramerSimpsonSCF(p Profile) (bestAlts []Alternative, err error) {
 	min := -1
 	count, err := KramerSimpsonSWF(p)
@@ -336,6 +343,69 @@ func CopelandSCF(p Profile) (bestAlts []Alternative, err error) {
 		}
 	}
 	return ans, nil
+}
+
+/**
+ * Coombs_SWF
+ * @Description: STV Coombs SWF
+ * @param p: un paramètre type Profile
+ * @return count: score des candidats, 1 signifie gagnant, 0 signifie d'etre éliminé
+ * @return err: erreurs possibles
+ */
+func CoombsSWF(p Profile) (count Count, err error) {
+	err = checkProfile(p)
+	if err != nil {
+		return nil, err
+	}
+
+	// supprimer un candidat
+	del := func(data *Profile, a Alternative) {
+		for i := 0; i < len(*data); i++ {
+			j := 0
+			for ; (*data)[i][j] != a; j++ {
+			}
+			k := j + 1
+			for ; k < len((*data)[i]); k++ {
+				(*data)[i][k-1] = (*data)[i][k]
+			}
+			(*data)[i][k-1] = -1
+		}
+	}
+	size := len(p[0])
+	for i := range p[0] {
+		count[p[0][i]] = 1
+	}
+
+	for i := 0; i < size-1; i++ {
+		var min_candidat Alternative = p[0][0]
+		m := make(Count)
+		for j, _ := range p {
+			m[p[j][size-1]]++
+		}
+		for key, value := range m {
+			if value < m[min_candidat] {
+				min_candidat = key
+			}
+
+		}
+		count[min_candidat] = -1
+		del(&p, min_candidat)
+	}
+
+	return count, nil
+}
+
+func Coombs(p Profile) (bestAlts []Alternative, err error) {
+	c, err := Coombs(p)
+	if err != nil {
+		return nil, err
+	}
+	for i, j := range c {
+		if j == 1 {
+			bestAlts = append(bestAlts, Alternative(i))
+		}
+	}
+	return bestAlts, nil
 }
 
 /**
