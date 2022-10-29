@@ -517,20 +517,20 @@ func Kemeny(p Profile) (ans []Alternative, e error) {
 }
 
 func SinglePeakSWF(p Profile) (count Count, err error) {
-	for i := range p {
-		order_inf := make([]Alternative, 0)
-		order_sup := make([]Alternative, 0)
+	for i := range p { // Vérification de single-peaked
+		order_inf := make([]Alternative, 0) // Stocker les candidats de l'ordre inférieur que le premier
+		order_sup := make([]Alternative, 0) // Stocker les candidats de l'ordre supérieur que le premier
 		med := p[i][0]
 		order_sup = append(order_sup, med)
 		order_inf = append(order_inf, med)
 		for j := i + 1; j < len(p[i]); j++ {
-			if p[i][j] < med {
+			if p[i][j] < med { // Stocker les candidats de l'ordre inférieur que le premier dans ordre_inf
 				order_inf = append(order_inf, p[i][j])
-			} else {
+			} else { // Stocker les candidats de l'ordre supérieur que le premier dans ordre_sup
 				order_sup = append(order_sup, p[i][j])
 			}
 		}
-		for k := 0; k < len(order_sup)-1; k++ {
+		for k := 0; k < len(order_sup)-1; k++ { // Vérification de l'ordre stricte
 			if order_sup[k] < order_sup[k+1] {
 				return nil, errors.New("Pas Single-Peaked")
 			}
@@ -549,6 +549,28 @@ func SinglePeakSWF(p Profile) (count Count, err error) {
 		count[p[i][0]]++
 	}
 	return count, nil
+}
+
+func SinglePeakedSCF(p Profile) (bestAlts []Alternative, err error) {
+	count, err := SinglePeakSWF(p)
+	note := make([]int, 0)
+	var median int
+	for _, elem := range count {
+		note = append(note, elem)
+	}
+	length := len(note)
+	sort.Ints(note)
+	if length%2 == 0 {
+		median = note[length/2-1]
+	} else {
+		median = note[length/2]
+	}
+	for key, elem := range count {
+		if elem == median {
+			bestAlts = append(bestAlts, key)
+		}
+	}
+	return bestAlts, nil
 }
 
 //
