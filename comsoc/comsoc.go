@@ -6,6 +6,7 @@ package comsoc
 
 import (
 	"errors"
+	"sort"
 )
 
 type Alternative int // Candidat
@@ -231,4 +232,36 @@ func Permute(nums []Alternative) [][]Alternative {
 	}
 	dfs(nums, []Alternative{})
 	return ans
+}
+
+/**
+ * SortByCount
+ * @Description: sort by a variable Count
+ * @param c: input Count
+ * @return []Alternative: the candidat sorted
+ */
+type Pair struct {
+	Key   Alternative
+	Value int
+}
+
+func SortByCount(c Count) []Alternative {
+	p := make([]Pair, len(c))
+	i := 0
+
+	for k, v := range c {
+		p[i] = Pair{k, v}
+		i++
+	}
+
+	sort.Slice(p,func(i,j int) bool {
+		return p[i].Value > p[j].Value
+	})
+
+	r := make([]Alternative,len(c))
+	for j := 0; j < len(c); j++ {
+		r[j] = p[j].Key
+	}
+
+	return r
 }

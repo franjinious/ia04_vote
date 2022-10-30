@@ -17,7 +17,7 @@ func Test_newballot(){
 
 	time.Sleep(2*time.Second)
 	s2 := []string{"ag_id1","ag_id2","ag_id3"}
-	g1 := sponsoragent.Sponsorinfo{"majority","Mon Jan 15:04:05 UTC 2006",s2,4}
+	g1 := sponsoragent.Sponsorinfo{"borda","Mon Jan 15:04:05 UTC 2006",s2,4}
 	p1 := sponsoragent.Sponsoragent{g1,"127.0.0.1:8082","none"}
 	p1.New_ballot()
 }

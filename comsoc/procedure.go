@@ -86,9 +86,12 @@ func MajoritySWF(p Profile) (count Count, err error) {
 	}
 
 	count = make(Count)
+	for i:=0; i<len(p[0]); i++ {
+		count[p[0][i]] = 0
+	}
 
 	for i := 0; i < len(p); i++ {
-		count[p[i][0]]++
+		count[p[i][0]] = count[p[i][0]] + 1
 	}
 
 	return count, err
@@ -196,7 +199,6 @@ func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error
  * @return Count: un paramètre type Count
  * @return error: erreurs possibles
  */
-
 func KramerSimpsonSWF(p Profile) (Count, error) {
 	note := make([]Alternative, 0)
 	count := make(Count)
