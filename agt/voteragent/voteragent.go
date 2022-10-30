@@ -134,10 +134,16 @@ func (v *Voteragent) Result() error{
 	log.SetFlags(log.Ldate | log.Ltime )
 
 	if re.Status == OK {
-		log.Println(": " + "get vote result, " + strconv.Itoa(*(*int)(&re.Winner)) + " win")
+		ou := (": " + "get vote result, " + strconv.Itoa(*(*int)(&re.Winner)) + " win")
 		if re.Ranking != nil {
-			log.Print(": ranking is ")
-			log.Println(re.Ranking)
+			out := ", ranking is [ "
+			for _,j := range re.Ranking {
+				temp := *(*int)(&j)
+				out += strconv.Itoa(temp)
+				out += " "
+			}
+			out += "]"
+			log.Print(ou + out)
 		}
 	}else if re.Status == TooEarly {
 		log.Println(": " + "vote has not finished")

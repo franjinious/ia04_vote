@@ -117,9 +117,8 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 		resp.Winner = -1
 		resp.Ranking = nil
 	} else {
-		fun := method_scf[b.Sponsor.Rule]
-
-		switch f := fun.(type) {
+		fun_scf := method_scf[b.Sponsor.Rule]
+		switch f := fun_scf.(type) {
 		case func(comsoc.Profile)([]comsoc.Alternative,error):
 			ans,e := f(b.p)
 			if e != nil {
@@ -132,14 +131,21 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 				resp.Ranking = nil
 			}
 		}
+
+		if _, ok := method_swf[b.Sponsor.Rule]; ok {
+			switch f := method_swf[b.Sponsor.Rule].(type) {
+			case func(comsoc.Profile)(comsoc.Count,error):
+				ans,e := f(b.p)
+				if e != nil {
+					resp.Ranking = nil
+				} else {
+					resp.Ranking = comsoc.SortByCount(ans)
+				}
+			}
+		}
 	}
 
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 	b.Unlock()
 }
-
-
-
-
-
