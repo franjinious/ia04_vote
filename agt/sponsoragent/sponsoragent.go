@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -71,7 +71,6 @@ func (s *Sponsoragent) New_ballot() error{
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -84,11 +83,14 @@ func (s *Sponsoragent) New_ballot() error{
 	var re Response
 	json.Unmarshal(buf.Bytes(), &re)
 	if re.Status == VoteCreateSuccess {
+		log.Println(": a new vote "+ re.ID + " create successfully")
 		s.ID = re.ID
 		return nil
 	}else if re.Status == BadRequest {
+		log.Println("server had a bad request, registration failed")
 		return errors.New("server had a bad request, registration failed")
 	}else {
+		log.Println("server had not implemented this function")
 		return errors.New("server had not implemented this function")
 	}
 	return nil
