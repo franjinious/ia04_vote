@@ -6,7 +6,6 @@ package comsoc
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Alternative int // Candidat
@@ -98,7 +97,6 @@ func checkProfile(prefs Profile) error {
 		set[j] = true
 	}
 
-	fmt.Println(set)
 	// Pour chaque votant, déterminez s'il y a des membres en plusieurs
 	for i := 1; i < len(prefs); i++ {
 		set_temp := make(map[Alternative]bool)

@@ -487,13 +487,29 @@ func STV_SCF(p Profile) (bestAlts []Alternative, err error) {
 }
 
 /**
+ * Kemeny_SWF
+ * @Description: Kemeny vote SWF
+ * @param p: un paramètre type Profile
+ * @return ans: gagnant
+ * @return e: erreurs possibles
+ */
+func Kemeny_SWF(p Profile) ( ans []Alternative, e error) {
+	a,e := Kemeny_SCF(p)
+	if e != nil {
+		return nil, e
+	}
+	temp := []Alternative{a[0]}
+	return temp,nil
+}
+
+/**
  * Kemeny
- * @Description: Kemeny vote
+ * @Description: Kemeny vote SCF
  * @param p: un paramètre type Profile
  * @return ans: ordre de candidats
  * @return e: erreurs possibles
  */
-func Kemeny(p Profile) (ans []Alternative, e error) {
+func Kemeny_SCF(p Profile) (ans []Alternative, e error) {
 	e = checkProfile(p)
 	if e != nil {
 		return nil, e
