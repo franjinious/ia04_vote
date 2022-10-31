@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"ia04-vote/comsoc"
+	"gitlab.utc.fr/wanhongz/ia04-vote/comsoc"
 	"log"
 	"net/http"
 	"strconv"

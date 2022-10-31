@@ -3,9 +3,9 @@ package ballotagent
 import (
 	"encoding/json"
 	"fmt"
-	"ia04-vote/agt/sponsoragent"
-	"ia04-vote/agt/voteragent"
-	"ia04-vote/comsoc"
+	"gitlab.utc.fr/wanhongz/ia04-vote/agt/sponsoragent"
+	"gitlab.utc.fr/wanhongz/ia04-vote/agt/voteragent"
+	"gitlab.utc.fr/wanhongz/ia04-vote/comsoc"
 	"log"
 	"net/http"
 	"sync"

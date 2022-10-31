@@ -1,6 +1,6 @@
 package main
 
-import "ia04-vote/agt/ballotagent"
+import "gitlab.utc.fr/wanhongz/ia04-vote/agt/ballotagent"
 
 /**
  * main
