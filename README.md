@@ -4,9 +4,11 @@
 
 Un système simple de vote, comprenant des programmes du serveur et des API de support côté client, basé sur un modèle multi-agent, qui peut initier, participer un vote et obtenir des résultats. Il prend en charge plusieurs algorithmes de vote courants.
 
+---
+
 #### Quick Start
 
-#### Go Build
+##### 1. Go Build
 
 Clonez le code source du projet à partir du site officiel utc gitlab.
 
@@ -28,7 +30,7 @@ Basculez votre répertoire actuel vers le chemin racine du projet et exécutez l
 ./ia04-vote
 ```
 
-#### Go Install
+##### 2. Go Install
 
 Vous pouvez également utiliser la commande **go install** pour installer.
 
@@ -44,5 +46,11 @@ Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** 
 $GOBIN/ia04-vote 
 ````
 
+Si tout est normal, vous pouvez voir l'invite de démarrage du serveur
 
+![start](/Users/whz/learning/ia04-vote/image/start.png)
+
+---
+
+#### Client API 
 
