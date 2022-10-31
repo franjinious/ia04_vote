@@ -39,7 +39,7 @@ go install -v gitlab.utc.fr/wanhongz/ia04-vote@latest
 Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** dans dossier **bin** sous le chemin **$GOBIN**, ou sous le chemin **$HOME/go**.
 
 ````bash
-~/go/bin/ia04-vote 
+~/go/bin/ia04-vote
 # ou
 $GOBIN/ia04-vote 
 ````
