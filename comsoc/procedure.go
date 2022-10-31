@@ -496,22 +496,6 @@ func STV_SCF(p Profile) (bestAlts []Alternative, err error) {
  * @return e: erreurs possibles
  */
 func Kemeny_SWF(p Profile) ( ans []Alternative, e error) {
-	a,e := Kemeny_SCF(p)
-	if e != nil {
-		return nil, e
-	}
-	temp := []Alternative{a[0]}
-	return temp,nil
-}
-
-/**
- * Kemeny
- * @Description: Kemeny vote SCF
- * @param p: un paramètre type Profile
- * @return ans: ordre de candidats
- * @return e: erreurs possibles
- */
-func Kemeny_SCF(p Profile) (ans []Alternative, e error) {
 	e = checkProfile(p)
 	if e != nil {
 		return nil, e
@@ -539,6 +523,22 @@ func Kemeny_SCF(p Profile) (ans []Alternative, e error) {
 	}
 
 	return ans, nil
+}
+
+/**
+ * Kemeny
+ * @Description: Kemeny vote SCF
+ * @param p: un paramètre type Profile
+ * @return ans: ordre de candidats
+ * @return e: erreurs possibles
+ */
+func Kemeny_SCF(p Profile) (ans []Alternative, e error) {
+	a,e := Kemeny_SWF(p)
+	if e != nil {
+		return nil, e
+	}
+	temp := []Alternative{a[0]}
+	return temp,nil
 }
 
 func SinglePeakSWF(p Profile) (count Count, err error) {
