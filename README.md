@@ -30,19 +30,19 @@ Basculez votre répertoire actuel vers le chemin racine du projet et exécutez l
 
 #### Go Install
 
-Si vous préférez, vous pouvez également utiliser la commande d'installation directement au lieu des étapes ci-dessus.
+Vous pouvez également utiliser la commande **go install** pour installer.
 
 ```go
-go install gitlab.utc.fr/wanhongz/ia04-vote@latest
+go install -v gitlab.utc.fr/wanhongz/ia04-vote@latest
 ```
 
-Si tout se passe bien, vous pouvez trouver le fichier exécutable correspondant dans le chemin **$GOBIN**, ou dans le chemin **$HOME/go/bin**.
+Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** dans dossier **bin** sous le chemin **$GOBIN**, ou sous le chemin **$HOME/go**.
 
-```
-# Exécuter le programme du vote serveur
-$GOBIN/ia04
+````bash
+~/go/bin/ia04-vote 
 # ou
-```
+$GOBIN/ia04-vote 
+````
 
 
 
