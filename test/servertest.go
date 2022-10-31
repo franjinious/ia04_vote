@@ -20,6 +20,8 @@ func Test_newballot(){
 	g1 := sponsoragent.Sponsorinfo{"borda","Mon Jan 15:04:05 UTC 2006",s2,4}
 	p1 := sponsoragent.Sponsoragent{g1,"127.0.0.1:8082","none"}
 	p1.New_ballot()
+	// a,_ := json.Marshal(g1)
+	// fmt.Println(*(*string)(unsafe.Pointer(&a)))
 }
 
 func Test_vote(){

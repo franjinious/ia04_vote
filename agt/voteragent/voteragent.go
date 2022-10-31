@@ -46,19 +46,16 @@ func newVoteragent(mutex sync.Mutex, serverAddress string, voterinfo Voterinfo) 
 	return &Voteragent{Mutex: mutex, ServerAddress: serverAddress, Voterinfo: voterinfo}
 }
 
-type Request struct {
-	Info Voterinfo `json:"info"`
-}
-
 type Response struct {
 	Status int `json:"status"`
 }
 
 func (v *Voteragent) Vote() error{
-	req := Request{
-		Info: Voterinfo{v.Agent_ID,v.Vote_ID,v.Prefs,v.Options},
+	req := Voterinfo{
+		 v.Agent_ID,v.Vote_ID,v.Prefs,v.Options,
 	}
 
+	// fmt.Println(req.Info)
 	url := "http://" + v.ServerAddress + "/vote"
 	data, e := json.Marshal(req)
 	if e != nil {
@@ -80,18 +77,18 @@ func (v *Voteragent) Vote() error{
 	json.Unmarshal(buf.Bytes(), &re)
 	log.SetFlags(log.Ldate | log.Ltime )
 	if re.Status == VoteSuccess {
-		log.Println(": " + req.Info.Agent_ID + " vote successfully for " + req.Info.Vote_ID)
+		log.Println(": " + req.Agent_ID + " vote successfully for " + req.Vote_ID)
 	}else if re.Status == BadRequest {
-		log.Println(": " +req.Info.Agent_ID + " request failed")
+		log.Println(": " +req.Agent_ID + " request failed")
 		return errors.New("request failed")
 	}else if re.Status == UselessVote {
-		log.Println(": " +req.Info.Agent_ID + " you have already voted")
+		log.Println(": " +req.Agent_ID + " you have already voted")
 		return errors.New("vote exist")
 	}else if re.Status == NotImplemented {
-		log.Println(": " +req.Info.Agent_ID + " function has no implemented")
+		log.Println(": " +req.Agent_ID + " function has no implemented")
 		return errors.New("not implemented")
 	}else {
-		log.Println(": " +req.Info.Agent_ID + " vote " + req.Info.Vote_ID + " has finished")
+		log.Println(": " +req.Agent_ID + " vote " + req.Vote_ID + " has finished")
 		return errors.New("time out")
 	}
 
@@ -112,8 +109,10 @@ func (v *Voteragent) Result() error{
 	req := Request_Result{
 		Ballot_Id: v.Vote_ID,
 	}
+
 	url := "http://" + v.ServerAddress + "/result"
 	data, e := json.Marshal(req)
+
 	if e != nil {
 		return e
 	}

@@ -24,10 +24,10 @@ type Ballotagentmanager struct {
 
 func (bs *Ballotagentmanager)handlerNewBallot(w http.ResponseWriter, r *http.Request) {
 	log.SetFlags(log.Ldate | log.Ltime )
-	log.Println(": get a new ballot request")
+	log.Println(": Get a new ballot request")
 
 	var resp sponsoragent.Response
-	var re sponsoragent.Request
+	var re sponsoragent.Sponsorinfo
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err := json.Unmarshal(buf.Bytes(), &re)
@@ -41,35 +41,62 @@ func (bs *Ballotagentmanager)handlerNewBallot(w http.ResponseWriter, r *http.Req
 
 		bs.Lock()
 		id += strconv.Itoa(bs.NowID)
-		b := Ballotagent{a,re.Info,make([]voteragent.Voterinfo,0),
-			make(map[string]bool),make(comsoc.Profile,0),id, false}
-		for i := 1; i <= re.Info.Alts; i++ {
+		t1,e1 := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006", re.Deadline, time.Local)
+		t2,_ := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006" ,time.Now().Format("Mon Jan 2 15:04:05 UTC 2006"), time.Local)
+		if e1 != nil {
+			resp.Status = 400
+			resp.ID = "none"
+			w.WriteHeader(http.StatusOK)
+			log.Println(": Fail to create a new ballot " + resp.ID + ", because time is not valid")
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+			bs.Unlock()
+			return
+		}
+
+		ex := t1.Unix() - t2.Unix()
+		if ex <= 0 {
+			resp.Status = 400
+			w.WriteHeader(http.StatusOK)
+			resp.ID = "none"
+			log.Println(": Fail to create a new ballot " + resp.ID + ", because time is not valid")
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+			bs.Unlock()
+			return
+		}
+
+		b := &Ballotagent{a,re,make([]voteragent.Voterinfo,0),
+			make(map[string]bool),make(comsoc.Profile,0),id, false, int(ex), make([]int,0)}
+		go b.SetFinished()
+		for i := 1; i <= re.Alts; i++ {
 			id := "ag_id"
 			id += strconv.Itoa(i)
 				b.Voters[id] = true
 		}
-		bs.Ballotagents[id] = &b
+		bs.Ballotagents[id] = b
+		// fmt.Println(bs.Ballotagents)
 		resp.ID = id
 		bs.NowID++
-		bs.Unlock()
 
 		resp.Status = 201
 		w.WriteHeader(http.StatusOK)
 		log.Println(": Create a new ballot " + resp.ID)
+		serial, _ := json.Marshal(resp)
+		w.Write(serial)
+		bs.Unlock()
 	}
-
-	serial, _ := json.Marshal(resp)
-	w.Write(serial)
 }
 
 func (bs *Ballotagentmanager)handlerVoteRequest(w http.ResponseWriter, r *http.Request){
 	bs.Lock()
 	log.SetFlags(log.Ldate | log.Ltime )
 	var resp voteragent.Response
-	var re voteragent.Request
+	var re voteragent.Voterinfo
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err := json.Unmarshal(buf.Bytes(), &re)
+	// fmt.Println(re)
 
 	if err != nil {
 		resp.Status = 400
@@ -79,11 +106,20 @@ func (bs *Ballotagentmanager)handlerVoteRequest(w http.ResponseWriter, r *http.R
 		bs.Unlock()
 		return
 	}
-	log.Println(": Get a new vote request of " + re.Info.Vote_ID + ", from " + re.Info.Agent_ID)
-
-	agent := bs.Ballotagents[re.Info.Vote_ID]
-	agent.getNewVoteRequest(re.Info,w)
-	bs.Unlock()
+	if _, ok := bs.Ballotagents[re.Vote_ID]; ok {
+		agent := bs.Ballotagents[re.Vote_ID]
+		agent.getNewVoteRequest(re,w)
+		bs.Unlock()
+	}else {
+		resp.Status = 404
+		w.WriteHeader(http.StatusOK)
+		serial, _ := json.Marshal(resp)
+		w.Write(serial)
+		log.Println(": Get a new vote request of " + re.Vote_ID + ", from " + re.Agent_ID + ", " +
+			"vote failed because the " + re.Vote_ID + " do not exist")
+		bs.Unlock()
+		return
+	}
 }
 
 func (bs *Ballotagentmanager)handlerResultRequest(w http.ResponseWriter, r *http.Request){
@@ -118,7 +154,7 @@ func (bs *Ballotagentmanager)handlerResultRequest(w http.ResponseWriter, r *http
 	}
 }
 
-func (bs *Ballotagentmanager) Start(){
+func (bs *Ballotagentmanager)Start(){
 	banner := "  ___    _    ___  _  _      __     __    _       \n " +
 		   "|_ _|  / \\  / _ \\| || |     \\ \\   / /__ | |_ ___ \n  " +
 		   "| |  / _ \\| | | | || |_ ____\\ \\ / / _ \\| __/ _ \\\n  " +
@@ -139,12 +175,12 @@ func (bs *Ballotagentmanager) Start(){
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.SetFlags(log.Ldate | log.Ltime )
-	log.Println(": start listen on \""+ bs.IP + ":" + bs.Port +"\"")
-	go log.Fatal(s.ListenAndServe())
+	log.Println(": Start listen on \""+ bs.IP + ":" + bs.Port +"\"")
+	log.Fatal(s.ListenAndServe())
 }
 
 func StartVoteServer(IP string,Port string){
 	var mutex sync.Mutex
 	bs := Ballotagentmanager{mutex,IP,Port,make(map[string]*Ballotagent),0}
-	go bs.Start()
+	bs.Start()
 }

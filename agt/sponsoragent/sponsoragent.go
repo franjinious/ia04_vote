@@ -44,10 +44,6 @@ const (
 	NotImplemented = 501
 )
 
-type Request struct {
-	Info Sponsorinfo `json:"info"`
-}
-
 type Response struct {
 	ID string `json:"id"`
 	Status int `json:"status"`
@@ -58,8 +54,8 @@ func (s *Sponsoragent) New_ballot() error{
 		return errors.New("this agent has already been registered")
 	}
 
-	req := Request{
-		Info: Sponsorinfo{s.Rule,s.Deadline,s.Voter_ids,s.Alts},
+	req := Sponsorinfo{
+		s.Rule,s.Deadline,s.Voter_ids,s.Alts,
 	}
 
 	url := "http://" + s.ServerAddress + "/new_ballot"
