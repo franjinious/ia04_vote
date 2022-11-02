@@ -46,7 +46,6 @@ const (
 
 type Response struct {
 	ID string `json:"id"`
-	Status int `json:"status"`
 }
 
 func (s *Sponsoragent) New_ballot() error{
@@ -78,11 +77,11 @@ func (s *Sponsoragent) New_ballot() error{
 	buf.ReadFrom(resp.Body)
 	var re Response
 	json.Unmarshal(buf.Bytes(), &re)
-	if re.Status == VoteCreateSuccess {
+	if resp.StatusCode == VoteCreateSuccess {
 		log.Println(": a new vote "+ re.ID + " create successfully")
 		s.ID = re.ID
 		return nil
-	}else if re.Status == BadRequest {
+	}else if resp.StatusCode == BadRequest {
 		log.Println("server had a bad request, registration failed")
 		return errors.New("server had a bad request, registration failed")
 	}else {

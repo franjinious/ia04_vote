@@ -46,9 +46,6 @@ func newVoteragent(mutex sync.Mutex, serverAddress string, voterinfo Voterinfo) 
 	return &Voteragent{Mutex: mutex, ServerAddress: serverAddress, Voterinfo: voterinfo}
 }
 
-type Response struct {
-	Status int `json:"status"`
-}
 
 func (v *Voteragent) Vote() error{
 	req := Voterinfo{
@@ -73,18 +70,17 @@ func (v *Voteragent) Vote() error{
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
-	var re Response
-	json.Unmarshal(buf.Bytes(), &re)
+
 	log.SetFlags(log.Ldate | log.Ltime )
-	if re.Status == VoteSuccess {
+	if resp.StatusCode == VoteSuccess {
 		log.Println(": " + req.Agent_ID + " vote successfully for " + req.Vote_ID)
-	}else if re.Status == BadRequest {
+	}else if resp.StatusCode == BadRequest {
 		log.Println(": " +req.Agent_ID + " request failed")
 		return errors.New("request failed")
-	}else if re.Status == UselessVote {
+	}else if resp.StatusCode == UselessVote {
 		log.Println(": " +req.Agent_ID + " you have already voted")
 		return errors.New("vote exist")
-	}else if re.Status == NotImplemented {
+	}else if resp.StatusCode == NotImplemented {
 		log.Println(": " +req.Agent_ID + " function has no implemented")
 		return errors.New("not implemented")
 	}else {
@@ -100,7 +96,6 @@ type Request_Result struct {
 }
 
 type Response_Result struct {
-	Status int `json:"status"`
 	Winner comsoc.Alternative `json:"winner"`
 	Ranking []comsoc.Alternative `json:"ranking"`
 }
@@ -132,7 +127,7 @@ func (v *Voteragent) Result() error{
 	json.Unmarshal(buf.Bytes(), &re)
 	log.SetFlags(log.Ldate | log.Ltime )
 
-	if re.Status == OK {
+	if resp.StatusCode == OK {
 		ou := (": " + "get vote result, " + strconv.Itoa(*(*int)(&re.Winner)) + " win")
 		if re.Ranking != nil {
 			out := ", ranking is [ "
@@ -144,10 +139,10 @@ func (v *Voteragent) Result() error{
 			out += "]"
 			log.Print(ou + out)
 		}
-	}else if re.Status == TooEarly {
+	}else if resp.StatusCode == TooEarly {
 		log.Println(": " + "vote has not finished")
 		return errors.New("Too Early")
-	}else if re.Status == Notfind {
+	}else if resp.StatusCode == Notfind {
 		log.Println(": " + "not find this function")
 		return errors.New("Not find")
 	}

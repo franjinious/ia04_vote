@@ -24,16 +24,15 @@ type Ballotagentmanager struct {
 
 func (bs *Ballotagentmanager)handlerNewBallot(w http.ResponseWriter, r *http.Request) {
 	log.SetFlags(log.Ldate | log.Ltime )
-	log.Println(": Get a new ballot request")
+	log.Println(": Get a new ballot create request")
 
 	var resp sponsoragent.Response
 	var re sponsoragent.Sponsorinfo
+
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err := json.Unmarshal(buf.Bytes(), &re)
 	if err != nil {
-		resp.ID = "none"
-		resp.Status = 400
 		w.WriteHeader(http.StatusBadRequest)
 	}else {
 		var a sync.Mutex
@@ -44,77 +43,67 @@ func (bs *Ballotagentmanager)handlerNewBallot(w http.ResponseWriter, r *http.Req
 		t1,e1 := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006", re.Deadline, time.Local)
 		t2,_ := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006" ,time.Now().Format("Mon Jan 2 15:04:05 UTC 2006"), time.Local)
 		if e1 != nil {
-			resp.Status = 400
-			resp.ID = "none"
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			log.Println(": Fail to create a new ballot " + resp.ID + ", because time is not valid")
-			serial, _ := json.Marshal(resp)
-			w.Write(serial)
 			bs.Unlock()
 			return
 		}
 
 		ex := t1.Unix() - t2.Unix()
 		if ex <= 0 {
-			resp.Status = 400
-			w.WriteHeader(http.StatusOK)
-			resp.ID = "none"
+			w.WriteHeader(http.StatusBadRequest)
 			log.Println(": Fail to create a new ballot " + resp.ID + ", because time is not valid")
-			serial, _ := json.Marshal(resp)
-			w.Write(serial)
 			bs.Unlock()
 			return
 		}
 
-		b := &Ballotagent{a,re,make([]voteragent.Voterinfo,0),
-			make(map[string]bool),make(comsoc.Profile,0),id, false, int(ex), make([]int,0)}
-		go b.SetFinished()
-		for i := 1; i <= re.Alts; i++ {
-			id := "ag_id"
-			id += strconv.Itoa(i)
+		if _, ok := method_scf[re.Rule]; ok {
+			b := &Ballotagent{a,re,make([]voteragent.Voterinfo,0),
+				make(map[string]bool),make(comsoc.Profile,0),id, false, int(ex), make([]int,0)}
+			go b.SetFinished()
+			for i := 1; i <= re.Alts; i++ {
+				id := "ag_id"
+				id += strconv.Itoa(i)
 				b.Voters[id] = true
-		}
-		bs.Ballotagents[id] = b
-		// fmt.Println(bs.Ballotagents)
-		resp.ID = id
-		bs.NowID++
+			}
+			bs.Ballotagents[id] = b
+			resp.ID = id
+			bs.NowID++
 
-		resp.Status = 201
-		w.WriteHeader(http.StatusOK)
-		log.Println(": Create a new ballot " + resp.ID)
-		serial, _ := json.Marshal(resp)
-		w.Write(serial)
-		bs.Unlock()
+			w.WriteHeader(http.StatusCreated)
+			log.Println(": Create a new ballot " + resp.ID)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+			bs.Unlock()
+		} else {
+			w.WriteHeader(http.StatusNotImplemented)
+			log.Println(": Fail to create a new ballot " + resp.ID + ", vote method is note valid")
+			bs.Unlock()
+		}
 	}
 }
 
 func (bs *Ballotagentmanager)handlerVoteRequest(w http.ResponseWriter, r *http.Request){
 	bs.Lock()
 	log.SetFlags(log.Ldate | log.Ltime )
-	var resp voteragent.Response
+
 	var re voteragent.Voterinfo
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err := json.Unmarshal(buf.Bytes(), &re)
-	// fmt.Println(re)
 
 	if err != nil {
-		resp.Status = 400
 		w.WriteHeader(http.StatusBadRequest)
-		serial, _ := json.Marshal(resp)
-		w.Write(serial)
 		bs.Unlock()
 		return
 	}
+
 	if _, ok := bs.Ballotagents[re.Vote_ID]; ok {
 		agent := bs.Ballotagents[re.Vote_ID]
 		agent.getNewVoteRequest(re,w)
 		bs.Unlock()
 	}else {
-		resp.Status = 404
-		w.WriteHeader(http.StatusOK)
-		serial, _ := json.Marshal(resp)
-		w.Write(serial)
+		w.WriteHeader(http.StatusNotImplemented)
 		log.Println(": Get a new vote request of " + re.Vote_ID + ", from " + re.Agent_ID + ", " +
 			"vote failed because the " + re.Vote_ID + " do not exist")
 		bs.Unlock()
@@ -131,8 +120,7 @@ func (bs *Ballotagentmanager)handlerResultRequest(w http.ResponseWriter, r *http
 	buf.ReadFrom(r.Body)
 	err := json.Unmarshal(buf.Bytes(), &re)
 	if err != nil {
-		resp.Status = 400
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
 		serial, _ := json.Marshal(resp)
 		w.Write(serial)
 		bs.Unlock()
@@ -145,8 +133,7 @@ func (bs *Ballotagentmanager)handlerResultRequest(w http.ResponseWriter, r *http
 		agent.getNewResultRequest(re.Ballot_Id,w)
 		bs.Unlock()
 	} else {
-		resp.Status = 404
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusNotFound)
 		serial, _ := json.Marshal(resp)
 		w.Write(serial)
 		bs.Unlock()

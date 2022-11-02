@@ -67,34 +67,39 @@ var method_swf = map[string]interface{} {
 
 func (b *Ballotagent) getNewVoteRequest(v voteragent.Voterinfo,w http.ResponseWriter){
 	b.Lock()
-	var resp voteragent.Response
 
 	if b.Isfinish == true {
-		resp.Status = 503
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusServiceUnavailable)
 		log.Println(": Get a new vote request of " + v.Vote_ID + ", from " + v.Agent_ID + ", " +
 			"vote failed because it has finished")
 	} else {
 		if b.Voters[v.Agent_ID] == false {
-			resp.Status = 403
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusForbidden)
 			log.Println(": Get a new vote request of " + v.Vote_ID + ", from " + v.Agent_ID + ", " +
 				"vote failed because the voter do not exist or he has already voted")
 		} else if len(v.Prefs) != b.Sponsor.Alts {
-			resp.Status = 400
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			log.Println(": Get a new vote request of " + v.Vote_ID + ", from " + v.Agent_ID + ", " +
 				"vote failed because the prefer list is not valid")
 		} else {
 			flag := true
+			note := make(map[comsoc.Alternative]bool)
 			for i:=0; i < len(v.Prefs); i++{
 				pt := (*int)(&v.Prefs[i])
 				if v.Prefs[i] <= 0 || *pt > b.Sponsor.Alts {
-					resp.Status = 400
-					w.WriteHeader(http.StatusOK)
+					w.WriteHeader(http.StatusBadRequest)
 					flag = false
 					log.Println(": Get a new vote request of " + v.Vote_ID + ", from " + v.Agent_ID + ", " +
 						"vote failed because the prefer list is not valid")
+					break
+				}
+				if note[v.Prefs[i]] == false {
+					note[v.Prefs[i]] = true
+				}else {
+					flag = false
+					log.Println(": Get a new vote request of " + v.Vote_ID + ", from " + v.Agent_ID + ", " +
+						"vote failed because the prefer list is not valid")
+					w.WriteHeader(http.StatusBadRequest)
 					break
 				}
 			}
@@ -102,7 +107,6 @@ func (b *Ballotagent) getNewVoteRequest(v voteragent.Voterinfo,w http.ResponseWr
 			if flag == true {
 				b.Voters[v.Agent_ID] = false
 				b.Voterinfos = append(b.Voterinfos,v)
-				resp.Status = 200
 				b.p = append(b.p,v.Prefs)
 				if v.Options!=nil && b.Sponsor.Rule=="approval" {
 					b.seuil = append(b.seuil,v.Options[0])
@@ -114,8 +118,6 @@ func (b *Ballotagent) getNewVoteRequest(v voteragent.Voterinfo,w http.ResponseWr
 		}
 	}
 
-	serial, _ := json.Marshal(resp)
-	w.Write(serial)
 	b.Unlock()
 }
 
@@ -133,7 +135,7 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 	}
 
 	if b.Isfinish != true {
-		resp.Status = TooEarly
+		w.WriteHeader(http.StatusTooEarly)
 		resp.Winner = -1
 		resp.Ranking = nil
 		log.Println(": Get a new result request of " + b.ID +
@@ -146,11 +148,11 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 			if e != nil {
 				log.Println(": Get a new result request of " + b.ID +
 					 ", but it has no result bacause error: " + e.Error())
-				resp.Status = 404
+				w.WriteHeader(http.StatusNotFound)
 				resp.Winner = -1
 				resp.Ranking = nil
 			} else {
-				resp.Status = 200
+				w.WriteHeader(http.StatusOK)
 				resp.Winner = ans[0]
 				resp.Ranking = nil
 			}
@@ -159,11 +161,11 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 			if e != nil {
 				log.Println(": Get a new result request of " + b.ID +
 					", but it has no result bacause error: " + e.Error())
-				resp.Status = 404
+				w.WriteHeader(http.StatusNotFound)
 				resp.Winner = -1
 				resp.Ranking = nil
 			} else {
-				resp.Status = 200
+				w.WriteHeader(http.StatusOK)
 				resp.Winner = ans[0]
 				resp.Ranking = nil
 			}
