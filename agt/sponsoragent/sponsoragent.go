@@ -16,7 +16,6 @@ type Sponsorinfo struct {
 	Rule string `json:"rule"` // "majority","borda", "approval", "stv", "kemeny",...
 	Deadline string `json:"deadline"`// e.g. "Tue Nov 10 23:00:00 UTC 2009"
 	Voter_ids []string  `json:"voter_Ids"`// e.g. ["ag_id1", "ag_id2", "ag_id3"]
-	Alts int `json:"alts"`
 }
 
 type Sponsoragent struct {

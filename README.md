@@ -56,7 +56,7 @@ Si tout est normal, vous pouvez voir l'invite de démarrage du serveur
 
 #### UML
 
-![uml](/Users/whz/learning/ia04-vote/image/uml.jpg)
+![uml](./image/uml.jpg)
 
 ---
 
