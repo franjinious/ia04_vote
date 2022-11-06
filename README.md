@@ -82,9 +82,22 @@ Avec cette commande, nous pouvons désormais créer un ballot de vote. Pour ce f
 - **deadline** de type **string**
 - **voter-Ids** de type **[string, ...]**
 - **alts** de type **int**
+
 Voir l'exemple ci-dessus. 201 signifie le succès de création.
 ![new_ballot](./image/new_ballot0.png)
-Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée.
+Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée, avec un code 201 retourné.
 Les votes sont numérotés de 0.
-En cas d'anomalie, 
-##### 
+En cas d'anomalie, **400** est retourné pour **bad request** et **501** pour **not implemented**
+
+##### Gestion des votants : /vote
+Cette commande sert à renseigner les préférences de chaque votants dans tous les ballots.
+De même, les informations des champs sont nécéssaires.
+- **agent_id** de type **string**
+- **vote_id** de type **string**. Cet ID est celui créé dans **/new_ballot**
+- **prefs** de type **[int, ...]**
+- **options** de type **int**
+
+Voir l'exemple ci-dessus.
+![vote](./image/vote.png)
+
+En cas d'anomalie, **400** est retourné pour **bad request**, **403** pour **vote déjà effectué**, **501** pour **not implemented** et **503** pour **la deadline est déjà dépassée**
