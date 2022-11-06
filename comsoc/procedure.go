@@ -356,6 +356,7 @@ func CopelandSCF(p Profile) (bestAlts []Alternative, err error) {
  * @return err: erreurs possibles
  */
 func CoombsSWF(p Profile) (count Count, err error) {
+	count = make(Count)
 	err = checkProfile(p)
 	if err != nil {
 		return nil, err
@@ -380,23 +381,24 @@ func CoombsSWF(p Profile) (count Count, err error) {
 	}
 
 	for i := 0; i < size-1; i++ {
-		var min_candidat Alternative = p[0][0]
-		m := make(Count)
-		for j, _ := range p {
-			m[p[j][size-1]]++
+		max_candidat := p[0][0]
+		m := make(map[Alternative]int)
+		for j := 0; j < len(p); j++ {
+			m[p[j][size-1-i]]++
 		}
 		for key, value := range m {
-			if value < m[min_candidat] {
-				min_candidat = key
+			if value > m[max_candidat] {
+				max_candidat = key
 			}
 
 		}
-		count[min_candidat] = -1
-		del(&p, min_candidat)
+		count[max_candidat] = -1
+		del(&p, max_candidat)
 	}
 
 	return count, nil
 }
+
 
 /**
  * CoombsSCF
