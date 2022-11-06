@@ -1,14 +1,14 @@
 # IA04-Vote
 
-#### Brief Introduction
+## Brève Introduction
 
 Un système simple de vote, comprenant des programmes du serveur et des API de support côté client, basé sur un modèle multi-agent, qui peut initier, participer un vote et obtenir des résultats. Il prend en charge plusieurs algorithmes de vote courants.
 
 ---
 
-#### Quick Start
+## Quick Start
 
-##### A. Go Build
+### A. Go Build
 
 1. Clonez le code source du projet à partir du site officiel utc gitlab.
 
@@ -32,7 +32,7 @@ go build
 
 
 
-##### B. Go Install
+### B. Go Install
 
 Vous pouvez également utiliser la commande **go install** pour installer.
 
@@ -54,16 +54,16 @@ Si tout est normal, vous pouvez voir l'invite de démarrage du serveur
 
 ---
 
-#### UML
+## UML
 
 ![uml](./image/uml.jpg)
 
 ---
 
-#### Client API 
+## Client API 
 Dans cette partie, nous vous présentons les fonctionnalités principales de nos APIs. Ils nous permettent de enregistrer plusieurs ballots de votes en même temps, de choisir la méthode de vote que l'on veut utiliser et d'obtenir le gagnant en utilisant la méthode choisie.
 
-##### Méthodes de votes
+### Méthodes de votes
 Nous avons mis en place plusieurs méthodes de votes pour obtenir un gagnant de :
 - condorcet 
 - majorité
@@ -76,20 +76,20 @@ Nous avons mis en place plusieurs méthodes de votes pour obtenir un gagnant de 
 - kemeny
 - singlepeak
 
-##### Création de ballot de vote : /new_ballot
+### Création de ballot de vote : /new_ballot
 Avec cette commande, nous pouvons désormais créer un ballot de vote. Pour ce faire, il faut renseigner les informations nécéssaires d'un ballot.
 - **rule** de type **string**. Choisir entre **"condorcet"**, **"majority"**, **"borda"**, **"kramersimpson"**, **"approval"**, **"copeland"**, **"coombs"**, **"stv"**, **"kemeny"**, **"singlepeak"**
 - **deadline** de type **string**
 - **voter-Ids** de type **[string, ...]**
 - **alts** de type **int**
 
-Voir l'exemple ci-dessus. 201 signifie le succès de création.
+Voir l'exemple ci-dessous. 201 signifie le succès de création.
 ![new_ballot](./image/new_ballot0.png)
 Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée, avec un code 201 retourné.
-Les votes sont numérotés de 0.
+Les votes sont numérotés apartir de 0.
 En cas d'anomalie, **400** est retourné pour **bad request** et **501** pour **not implemented**
 
-##### Gestion des votants : /vote
+### Gestion des votants : /vote
 Cette commande sert à renseigner les préférences de chaque votants dans tous les ballots.
 De même, les informations des champs sont nécéssaires.
 - **agent_id** de type **string**
@@ -97,7 +97,23 @@ De même, les informations des champs sont nécéssaires.
 - **prefs** de type **[int, ...]**
 - **options** de type **int**
 
-Voir l'exemple ci-dessus.
+Voir l'exemple ci-dessous.
 ![vote](./image/vote.png)
 
 En cas d'anomalie, **400** est retourné pour **bad request**, **403** pour **vote déjà effectué**, **501** pour **not implemented** et **503** pour **la deadline est déjà dépassée**
+### Résultats : /result
+En renseignant **ballot_Id** de type **string** obtenu précedemment(**votex**), nous pouvons obtenir le résultat.
+
+Voir l'exemple ci-dessous.
+![result](./image/result.png)
+
+En cas d'anomalie, **425** est retourné pour **Too early**, signifiant qu'il existe des votants qui n'ont pas encore voté, **404** pour **not found**.
+
+### Fichier exécutable
+Le fichier exécutable nous donne la possibilité de savoir l'état de chaque commande. Voici un exemple d'un vote sans erreurs.
+![result](./image/result.png)
+
+En cas d'anomalie, les messages sont aussi affichés, ainsi sur le site d'API.
+![erreur1](./image/erreur1.png)
+
+![erreur2](./image/erreur2.png)
