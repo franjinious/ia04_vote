@@ -61,4 +61,30 @@ Si tout est normal, vous pouvez voir l'invite de démarrage du serveur
 ---
 
 #### Client API 
+Dans cette partie, nous vous présentons les fonctionnalités principales de nos APIs. Ils nous permettent de enregistrer plusieurs ballots de votes en même temps, de choisir la méthode de vote que l'on veut utiliser et d'obtenir le gagnant en utilisant la méthode choisie.
 
+##### Méthodes de votes
+Nous avons mis en place plusieurs méthodes de votes pour obtenir un gagnant de :
+- condorcet 
+- majorité
+- borda
+- kramer-simpson 
+- approval
+- copeland
+- coombs
+- stv
+- kemeny
+- singlepeak
+
+##### Création de ballot de vote : /new_ballot
+Avec cette commande, nous pouvons désormais créer un ballot de vote. Pour ce faire, il faut renseigner les informations nécéssaires d'un ballot.
+- **rule** de type **string**. Choisir entre **"condorcet"**, **"majority"**, **"borda"**, **"kramersimpson"**, **"approval"**, **"copeland"**, **"coombs"**, **"stv"**, **"kemeny"**, **"singlepeak"**
+- **deadline** de type **string**
+- **voter-Ids** de type **[string, ...]**
+- **alts** de type **int**
+Voir l'exemple ci-dessus. 201 signifie le succès de création.
+![new_ballot](./image/new_ballot0.png)
+Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée.
+Les votes sont numérotés de 0.
+En cas d'anomalie, 
+##### 
