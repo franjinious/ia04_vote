@@ -201,12 +201,12 @@ func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error
  */
 func KramerSimpsonSWF(p Profile) (Count, error) {
 	note := make([]Alternative, 0)
-	count := make(Count)
+	count := make(map[Alternative]int)
 	for i := range p[0] {
 		note = append(note, p[0][i])
 	}
-	for _, value := range note {
-		count[value] = 0
+	for key, _ := range note {
+		count[note[key]] = 0
 	}
 	for i := 0; i < len(note); i++ { //Comparer les voix du candidat i et du candidat j
 		for j := i + 1; j < len(note); j++ {
@@ -233,13 +233,13 @@ func KramerSimpsonSWF(p Profile) (Count, error) {
 			//Mise à jour de la note de chaque candidat : on choisit le minimum
 			if count[note[i]] == 0 {
 				count[note[i]] = a
-			} else if count[note[i]] < a {
+			} else if count[note[i]] > a {
 				count[note[i]] = a
 			}
 
 			if count[note[j]] == 0 {
 				count[note[j]] = b
-			} else if count[note[j]] < b {
+			} else if count[note[j]] > b {
 				count[note[j]] = b
 			}
 
@@ -257,19 +257,20 @@ func KramerSimpsonSWF(p Profile) (Count, error) {
  * @return err: erreurs possibles
  */
 func KramerSimpsonSCF(p Profile) (bestAlts []Alternative, err error) {
-	min := -1
+	max_index := 0
 	count, err := KramerSimpsonSWF(p)
 	if err != nil {
 		return nil, err
 	}
 	for key, value := range count {
-		if value < min {
-			min = value
-			bestAlts = append(bestAlts, key)
+		if value > count[Alternative(max_index)] {
+			max_index = int(key)
 		}
 	}
+	bestAlts = append(bestAlts, Alternative(max_index))
 	return bestAlts, nil
 }
+
 
 /**
  * CopelandSWF
