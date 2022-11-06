@@ -11,24 +11,10 @@ import (
 	"sync"
 )
 
-//
-// agent pour voter
-//
-
-const (
-	// for api /vote
-	VoteSuccess = 200
-	BadRequest = 400
-	UselessVote = 403
-	NotImplemented = 501
-	TimeOut = 503
-
-	// for api /result
-	OK = 200
-	TooEarly = 425
-	Notfind = 404
-)
-
+/**
+ * Voterinfo
+ * @Description: Paramètres requis pour la demande /vote
+ */
 type Voterinfo struct {
 	Agent_ID string `json:"agent_id"`// e.g. "ag_id1"
 	Vote_ID string `json:"vote_id"`// e.g. "vote12"
@@ -36,6 +22,10 @@ type Voterinfo struct {
 	Options []int `json:"options"`
 }
 
+/**
+ * Voteragent
+ * @Description: agent pour participer un vote
+ */
 type Voteragent struct {
 	sync.Mutex
 	ServerAddress string
@@ -46,7 +36,11 @@ func newVoteragent(mutex sync.Mutex, serverAddress string, voterinfo Voterinfo) 
 	return &Voteragent{Mutex: mutex, ServerAddress: serverAddress, Voterinfo: voterinfo}
 }
 
-
+/**
+ * Vote
+ * @Description: envoyer une demande /vote
+ * @return error: erreurs possibles
+ */
 func (v *Voteragent) Vote() error{
 	req := Voterinfo{
 		 v.Agent_ID,v.Vote_ID,v.Prefs,v.Options,
@@ -72,15 +66,15 @@ func (v *Voteragent) Vote() error{
 	buf.ReadFrom(resp.Body)
 
 	log.SetFlags(log.Ldate | log.Ltime )
-	if resp.StatusCode == VoteSuccess {
+	if resp.StatusCode == http.StatusOK {
 		log.Println(": " + req.Agent_ID + " vote successfully for " + req.Vote_ID)
-	}else if resp.StatusCode == BadRequest {
+	}else if resp.StatusCode == http.StatusBadRequest {
 		log.Println(": " +req.Agent_ID + " request failed")
 		return errors.New("request failed")
-	}else if resp.StatusCode == UselessVote {
+	}else if resp.StatusCode == http.StatusForbidden {
 		log.Println(": " +req.Agent_ID + " you have already voted")
 		return errors.New("vote exist")
-	}else if resp.StatusCode == NotImplemented {
+	}else if resp.StatusCode == http.StatusNotImplemented {
 		log.Println(": " +req.Agent_ID + " function has no implemented")
 		return errors.New("not implemented")
 	}else {
@@ -100,6 +94,11 @@ type Response_Result struct {
 	Ranking []comsoc.Alternative `json:"ranking"`
 }
 
+/**
+ * Result
+ * @Description: envoyer une demande /result
+ * @return error: erreurs possibles
+ */
 func (v *Voteragent) Result() error{
 	req := Request_Result{
 		Ballot_Id: v.Vote_ID,
@@ -127,7 +126,7 @@ func (v *Voteragent) Result() error{
 	json.Unmarshal(buf.Bytes(), &re)
 	log.SetFlags(log.Ldate | log.Ltime )
 
-	if resp.StatusCode == OK {
+	if resp.StatusCode == http.StatusOK {
 		ou := (": " + "get vote result, " + strconv.Itoa(*(*int)(&re.Winner)) + " win")
 		if re.Ranking != nil {
 			out := ", ranking is [ "
@@ -139,10 +138,10 @@ func (v *Voteragent) Result() error{
 			out += "]"
 			log.Print(ou + out)
 		}
-	}else if resp.StatusCode == TooEarly {
+	}else if resp.StatusCode == http.StatusTooEarly {
 		log.Println(": " + "vote has not finished")
 		return errors.New("Too Early")
-	}else if resp.StatusCode == Notfind {
+	}else if resp.StatusCode == http.StatusNotFound {
 		log.Println(": " + "not find this function")
 		return errors.New("Not find")
 	}

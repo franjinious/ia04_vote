@@ -8,10 +8,10 @@ import (
 	"net/http"
 )
 
-//
-// agent pour initier un vote
-//
-
+/**
+ * Sponsorinfo
+ * @Description: Paramètres requis pour la demande /new_ballot
+ */
 type Sponsorinfo struct {
 	Rule string `json:"rule"` // "majority","borda", "approval", "stv", "kemeny",...
 	Deadline string `json:"deadline"`// e.g. "Tue Nov 10 23:00:00 UTC 2009"
@@ -19,6 +19,10 @@ type Sponsorinfo struct {
 	Alts int `json:"alts"`
 }
 
+/**
+ * Sponsoragent
+ * @Description: agent pour initier un vote
+ */
 type Sponsoragent struct {
 	Sponsorinfo
 	ServerAddress string
@@ -38,16 +42,15 @@ var method = map[string]int {
 	"singlepeak"    :8,
 }
 
-const (
-	VoteCreateSuccess = 201
-	BadRequest = 400
-	NotImplemented = 501
-)
-
 type Response struct {
 	ID string `json:"id"`
 }
 
+/**
+ * New_ballot
+ * @Description: envoyer une demande de /new_ballot
+ * @return error: erreurs possibles
+ */
 func (s *Sponsoragent) New_ballot() error{
 	if s.ID != "none" {
 		return errors.New("this agent has already been registered")
@@ -77,11 +80,11 @@ func (s *Sponsoragent) New_ballot() error{
 	buf.ReadFrom(resp.Body)
 	var re Response
 	json.Unmarshal(buf.Bytes(), &re)
-	if resp.StatusCode == VoteCreateSuccess {
+	if resp.StatusCode == http.StatusCreated {
 		log.Println(": a new vote "+ re.ID + " create successfully")
 		s.ID = re.ID
 		return nil
-	}else if resp.StatusCode == BadRequest {
+	}else if resp.StatusCode == http.StatusBadRequest {
 		log.Println("server had a bad request, registration failed")
 		return errors.New("server had a bad request, registration failed")
 	}else {

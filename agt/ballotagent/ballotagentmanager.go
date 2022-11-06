@@ -7,6 +7,7 @@ import (
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/sponsoragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/voteragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/comsoc"
+	io "io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,14 +15,22 @@ import (
 	"time"
 )
 
+/**
+ * Ballotagentmanager
+ * @Description: Gérer tous les votes, main server
+ */
 type Ballotagentmanager struct {
 	sync.Mutex
-	IP           string
-	Port         string
-	Ballotagents map[string]*Ballotagent
-	NowID        int
+	IP           string  // ip du serveur
+	Port         string  // port du serveur
+	Ballotagents map[string]*Ballotagent // map du tous les Ballotagents
+	NowID        int // prochain identifiant disponible de vote
 }
 
+/**
+ * handlerNewBallot
+ * @Description: Le processeur de la requête /new_ballot
+ */
 func (bs *Ballotagentmanager) handlerNewBallot(w http.ResponseWriter, r *http.Request) {
 	log.SetFlags(log.Ldate | log.Ltime)
 	log.Println(": Get a new ballot create request")
@@ -40,6 +49,8 @@ func (bs *Ballotagentmanager) handlerNewBallot(w http.ResponseWriter, r *http.Re
 
 		bs.Lock()
 		id += strconv.Itoa(bs.NowID)
+
+		// Vérifier l'heure d'échéance
 		t1, e1 := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006", re.Deadline, time.Local)
 		t2, _ := time.ParseInLocation("Mon Jan 2 15:04:05 UTC 2006", time.Now().Format("Mon Jan 2 15:04:05 UTC 2006"), time.Local)
 		if e1 != nil {
@@ -58,9 +69,14 @@ func (bs *Ballotagentmanager) handlerNewBallot(w http.ResponseWriter, r *http.Re
 		}
 
 		if _, ok := method_scf[re.Rule]; ok {
+			// Créer un nouveau vote
 			b := &Ballotagent{a, re, make([]voteragent.Voterinfo, 0),
 				make(map[string]bool), make(comsoc.Profile, 0), id, false, int(ex), make([]int, 0)}
+
+			// timer
 			go b.SetFinished()
+
+			// préparer tous les votants
 			for i := 1; i <= len(re.Voter_ids); i++ {
 				id := "ag_id"
 				id += strconv.Itoa(i)
@@ -70,6 +86,7 @@ func (bs *Ballotagentmanager) handlerNewBallot(w http.ResponseWriter, r *http.Re
 			resp.ID = id
 			bs.NowID++
 
+			// retourner
 			w.WriteHeader(http.StatusCreated)
 			log.Println(": Create a new ballot " + resp.ID)
 			serial, _ := json.Marshal(resp)
@@ -83,6 +100,10 @@ func (bs *Ballotagentmanager) handlerNewBallot(w http.ResponseWriter, r *http.Re
 	}
 }
 
+/**
+ * handlerVoteRequest
+ * @Description: Le processeur de la requête /vote
+ */
 func (bs *Ballotagentmanager) handlerVoteRequest(w http.ResponseWriter, r *http.Request) {
 	bs.Lock()
 	log.SetFlags(log.Ldate | log.Ltime)
@@ -111,6 +132,11 @@ func (bs *Ballotagentmanager) handlerVoteRequest(w http.ResponseWriter, r *http.
 	}
 }
 
+
+/**
+ * handlerResultRequest
+ * @Description: Le processeur de la requête /result
+ */
 func (bs *Ballotagentmanager) handlerResultRequest(w http.ResponseWriter, r *http.Request) {
 	bs.Lock()
 	log.SetFlags(log.Ldate | log.Ltime)
@@ -141,14 +167,11 @@ func (bs *Ballotagentmanager) handlerResultRequest(w http.ResponseWriter, r *htt
 	}
 }
 
+/**
+ * Start
+ * @Description: fonction de démarrage du serveur
+ */
 func (bs *Ballotagentmanager) Start() {
-	banner := "  ___    _    ___  _  _      __     __    _       \n " +
-		"|_ _|  / \\  / _ \\| || |     \\ \\   / /__ | |_ ___ \n  " +
-		"| |  / _ \\| | | | || |_ ____\\ \\ / / _ \\| __/ _ \\\n  " +
-		"| | / ___ \\ |_| |__   _|_____\\ V / (_) | ||  __/\n " +
-		"|___/_/   \\_\\___/   |_|        \\_/ \\___/ \\__\\___| \n"
-
-	fmt.Println(banner)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/new_ballot", bs.handlerNewBallot)
 	mux.HandleFunc("/vote", bs.handlerVoteRequest)
@@ -166,8 +189,59 @@ func (bs *Ballotagentmanager) Start() {
 	log.Fatal(s.ListenAndServe())
 }
 
-func StartVoteServer(IP string, Port string) {
+type ServerInfo struct {
+	IP  string `json:ip`
+	Port  string `json:port`
+}
+
+var file_locker sync.Mutex
+
+func LoadConfig(filename string) (ServerInfo, bool) {
+	log.SetFlags(log.Ldate | log.Ltime)
+	var conf ServerInfo
+	file_locker.Lock()
+	data, err := io.ReadFile(filename) //read config file
+	file_locker.Unlock()
+	if err != nil {
+		log.Println("read json file error")
+		return conf, false
+	}
+	datajson := []byte(data)
+	err = json.Unmarshal(datajson, &conf)
+	if err != nil {
+		log.Println("unmarshal json file error")
+		return conf, false
+	}
+	return conf, true
+}
+
+func InitConfig() ServerInfo {
+	log.SetFlags(log.Ldate | log.Ltime)
+	conf, bl := LoadConfig("./config.json") //get config struct
+	if !bl {
+		log.Println("InitConfig failed")
+		return ServerInfo{"127.0.0.1","8082"}
+	}
+	log.Println(": Init config file successed")
+	return conf
+}
+
+/**
+ * StartVoteServer
+ * @Description: L'interface pour démarrer la fonction
+ * @param IP：ip de serveur
+ * @param Port: port de serveur
+ */
+func StartVoteServer() {
+	banner := "  ___    _    ___  _  _      __     __    _       \n " +
+		"|_ _|  / \\  / _ \\| || |     \\ \\   / /__ | |_ ___ \n  " +
+		"| |  / _ \\| | | | || |_ ____\\ \\ / / _ \\| __/ _ \\\n  " +
+		"| | / ___ \\ |_| |__   _|_____\\ V / (_) | ||  __/\n " +
+		"|___/_/   \\_\\___/   |_|        \\_/ \\___/ \\__\\___| \n"
+	fmt.Println(banner)
+	log.SetFlags(log.Ldate | log.Ltime)
 	var mutex sync.Mutex
-	bs := Ballotagentmanager{mutex, IP, Port, make(map[string]*Ballotagent), 0}
+	s := InitConfig()
+	bs := Ballotagentmanager{mutex, s.IP, s.Port, make(map[string]*Ballotagent), 0}
 	bs.Start()
 }

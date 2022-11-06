@@ -7,5 +7,5 @@ import "gitlab.utc.fr/wanhongz/ia04-vote/agt/ballotagent"
  * @Description: Démarrer le serveur de vote
  */
 func main() {
-	ballotagent.StartVoteServer("127.0.0.1","8082")
+	ballotagent.StartVoteServer()
 }

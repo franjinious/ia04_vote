@@ -11,10 +11,11 @@ import (
 	"sync"
 	"time"
 )
-//
-// agent pour gérer les vote
-//
 
+/**
+ * Ballotagent
+ * @Description: le gestionnaire pour un vote
+ */
 type Ballotagent struct {
 	sync.Mutex
 	Sponsor sponsoragent.Sponsorinfo
@@ -26,20 +27,6 @@ type Ballotagent struct {
 	Expiration int
 	seuil []int
 }
-
-const (
-	VoteCreateSuccess = 201
-	BadRequest = 400
-	NotImplemented = 501
-
-	VoteSuccess = 200
-	UselessVote = 403
-	TimeOut = 503
-
-	OK = 200
-	TooEarly = 425
-	Notfind = 404
-)
 
 // tous les vote algorithme
 var method_scf = map[string]interface{} {
@@ -65,6 +52,12 @@ var method_swf = map[string]interface{} {
 	"kemeny"        : comsoc.Kemeny_SWF,
 }
 
+/**
+ * getNewVoteRequest
+ * @Description: Traiter une nouvelle demande de /vote
+ * @param v：information du votant
+ * @param w: http.ResponseWriter
+ */
 func (b *Ballotagent) getNewVoteRequest(v voteragent.Voterinfo,w http.ResponseWriter){
 	b.Lock()
 
@@ -121,6 +114,12 @@ func (b *Ballotagent) getNewVoteRequest(v voteragent.Voterinfo,w http.ResponseWr
 	b.Unlock()
 }
 
+/**
+ * getNewResultRequest
+ * @Description: Traiter une nouvelle demande de /result
+ * @param ID: id du vote
+ * @param w: http.ResponseWriter
+ */
 func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 	b.Lock()
 	var resp voteragent.Response_Result
@@ -204,6 +203,10 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
 	b.Unlock()
 }
 
+/**
+ * SetFinished
+ * @Description: minuteur
+ */
 func (b* Ballotagent) SetFinished() {
 	timer := time.After(time.Duration(b.Expiration) * time.Second)
 	<-timer
