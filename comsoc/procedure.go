@@ -543,30 +543,31 @@ func Kemeny_SCF(p Profile) (ans []Alternative, e error) {
 }
 
 func SinglePeakSWF(p Profile) (count Count, err error) {
-	for i := range p { // Vérification de single-peaked
-		order_inf := make([]Alternative, 0) // Stocker les candidats de l'ordre inférieur que le premier
-		order_sup := make([]Alternative, 0) // Stocker les candidats de l'ordre supérieur que le premier
-		med := p[i][0]
-		order_sup = append(order_sup, med)
-		order_inf = append(order_inf, med)
-		for j := i + 1; j < len(p[i]); j++ {
-			if p[i][j] < med { // Stocker les candidats de l'ordre inférieur que le premier dans ordre_inf
-				order_inf = append(order_inf, p[i][j])
-			} else { // Stocker les candidats de l'ordre supérieur que le premier dans ordre_sup
-				order_sup = append(order_sup, p[i][j])
-			}
-		}
-		for k := 0; k < len(order_sup)-1; k++ { // Vérification de l'ordre stricte
-			if order_sup[k] < order_sup[k+1] {
-				return nil, errors.New("Pas Single-Peaked")
-			}
-		}
-		for k := 0; k < len(order_inf)-1; k++ {
-			if order_inf[k] < order_inf[k+1] {
-				return nil, errors.New("Pas Single-Peaked")
-			}
-		}
-	}
+	count = make(Count)
+	//for i := range p { // Vérification de single-peaked
+	//	order_inf := make([]Alternative, 0) // Stocker les candidats de l'ordre inférieur que le premier
+	//	order_sup := make([]Alternative, 0) // Stocker les candidats de l'ordre supérieur que le premier
+	//	med := p[i][0]
+	//	order_sup = append(order_sup, med)
+	//	order_inf = append(order_inf, med)
+	//	for j := 1; j < len(p[i]); j++ {
+	//		if p[i][j] < med { // Stocker les candidats de l'ordre inférieur que le premier dans ordre_inf
+	//			order_inf = append(order_inf, p[i][j])
+	//		} else { // Stocker les candidats de l'ordre supérieur que le premier dans ordre_sup
+	//			order_sup = append(order_sup, p[i][j])
+	//		}
+	//	}
+	//	for k := 0; k < len(order_sup)-1; k++ { // Vérification de l'ordre stricte
+	//		if order_sup[k] > order_sup[k+1] {
+	//			return nil, errors.New("Pas Single-Peaked")
+	//		}
+	//	}
+	//	for k := 0; k < len(order_inf)-1; k++ {
+	//		if order_inf[k] < order_inf[k+1] {
+	//			return nil, errors.New("Pas Single-Peaked")
+	//		}
+	//	}
+	//}
 
 	for _, value := range p[0] {
 		count[value] = 0
@@ -587,9 +588,9 @@ func SinglePeakedSCF(p Profile) (bestAlts []Alternative, err error) {
 	length := len(note)
 	sort.Ints(note)
 	if length%2 == 0 {
-		median = note[length/2-1]
+		median = note[int(length/2-1)]
 	} else {
-		median = note[length/2]
+		median = note[int(length/2)]
 	}
 	for key, elem := range count {
 		if elem == median {
@@ -598,6 +599,7 @@ func SinglePeakedSCF(p Profile) (bestAlts []Alternative, err error) {
 	}
 	return bestAlts, nil
 }
+
 
 //
 // Factory function
