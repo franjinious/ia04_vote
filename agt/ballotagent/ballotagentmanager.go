@@ -219,7 +219,7 @@ func InitConfig() ServerInfo {
 	log.SetFlags(log.Ldate | log.Ltime)
 	conf, bl := LoadConfig("./config.json") //get config struct
 	if !bl {
-		log.Println("InitConfig failed")
+		log.Println("Init config file failed")
 		return ServerInfo{"127.0.0.1","8082"}
 	}
 	log.Println(": Init config file successed")

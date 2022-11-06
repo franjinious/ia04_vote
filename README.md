@@ -8,29 +8,31 @@ Un système simple de vote, comprenant des programmes du serveur et des API de s
 
 #### Quick Start
 
-##### Go Build
+##### A. Go Build
 
-Clonez le code source du projet à partir du site officiel utc gitlab.
+1. Clonez le code source du projet à partir du site officiel utc gitlab.
 
 ```bash
 git clone https://gitlab.utc.fr/wanhongz/ia04-vote.git
 ```
 
-Compilez avec la commande golang.
+2. Modifiez le fichier de configuration dans le répertoire racine du projet, modifiez l'adresse IP et le port de votre serveur ( L'adresse par défaut est **"127.0.0.1:8082"** ).
+
+3. Compilez avec la commande go build.
 
 ```go
 go build
 ```
 
-Ensuite, vous pouvez trouver l'exécutable **ia04-vote** dans le répertoire racine du projet.
-
-Basculez votre répertoire actuel vers le chemin racine du projet et exécutez la commande suivante
+4. Ensuite, vous pouvez trouver l'exécutable **ia04-vote** dans le répertoire racine du projet, l'exécutez
 
 ```bash
 ./ia04-vote
 ```
 
-##### Go Install
+
+
+##### B. Go Install
 
 Vous pouvez également utiliser la commande **go install** pour installer.
 
@@ -38,12 +40,10 @@ Vous pouvez également utiliser la commande **go install** pour installer.
 go install -v gitlab.utc.fr/wanhongz/ia04-vote@latest
 ```
 
-Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** dans dossier **bin** sous le chemin **$GOBIN**, ou sous le chemin **$HOME/go**.
+Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** dans dossier **bin** sous le chemin **$GOPATH**. 
 
 ````shell
-~/go/bin/ia04-vote
-# ou
-$GOBIN/ia04-vote 
+$GOPATH/bin/ia04-vote
 ````
 
 
