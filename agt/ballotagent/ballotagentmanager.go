@@ -204,7 +204,7 @@ func LoadConfig(filename string) (ServerInfo, bool) {
 	data, err := io.ReadFile(filename) //read config file
 	file_locker.Unlock()
 	if err != nil {
-		log.Println("read json file error")
+		log.Println(": read json file error")
 		return conf, false
 	}
 	datajson := []byte(data)
@@ -221,7 +221,7 @@ func InitConfig() ServerInfo {
 	dir,_ := os.Getwd()
 	conf, bl := LoadConfig(dir + "/config.json") //get config struct
 	if !bl {
-		log.Println("Init config file failed")
+		log.Println(": Init config file failed")
 		return ServerInfo{"127.0.0.1","8082"}
 	}
 	log.Println(": Init config file successed")
