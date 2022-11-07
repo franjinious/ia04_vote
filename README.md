@@ -85,7 +85,7 @@ Avec cette commande, nous pouvons désormais créer un ballot de vote. Pour ce f
 
 Voir l'exemple ci-dessous. 201 signifie le succès de création.
 ![new_ballot](./image/new_ballot0.png)
-Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée, avec un code 201 retourné.
+Si vous voulez lancer plusieurs votes, changez des informations et envoyez, une nouvelle vote est créée, avec un code **201** retourné.
 Les votes sont numérotés apartir de 0.
 En cas d'anomalie, **400** est retourné pour **bad request** et **501** pour **not implemented**
 
@@ -102,7 +102,7 @@ Voir l'exemple ci-dessous.
 
 En cas d'anomalie, **400** est retourné pour **bad request**, **403** pour **vote déjà effectué**, **501** pour **not implemented** et **503** pour **la deadline est déjà dépassée**
 ### Résultats : /result
-En renseignant **ballot_Id** de type **string** obtenu précedemment(**votex**), nous pouvons obtenir le résultat.
+En renseignant **ballot_Id** de type **string** obtenu précedemment(**votex**), nous pouvons obtenir le résultat. Ce dernier comprend deux partie : le gagnant et le **ranking** (si la méthode de vote nous permet de l'obtenir).
 
 Voir l'exemple ci-dessous.
 ![result](./image/result.png)
@@ -111,7 +111,7 @@ En cas d'anomalie, **425** est retourné pour **Too early**, signifiant qu'il ex
 
 ### Fichier exécutable
 Le fichier exécutable nous donne la possibilité de savoir l'état de chaque commande. Voici un exemple d'un vote sans erreurs.
-![result](./image/result.png)
+![executable](./image/executable.png)
 
 En cas d'anomalie, les messages sont aussi affichés, ainsi sur le site d'API.
 ![erreur1](./image/erreur1.png)
