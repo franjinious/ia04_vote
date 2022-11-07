@@ -7,10 +7,8 @@ import (
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/sponsoragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/voteragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/comsoc"
-	io "io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -190,51 +188,13 @@ func (bs *Ballotagentmanager) Start() {
 	log.Fatal(s.ListenAndServe())
 }
 
-type ServerInfo struct {
-	IP  string `json:ip`
-	Port  string `json:port`
-}
-
-var file_locker sync.Mutex
-
-func LoadConfig(filename string) (ServerInfo, bool) {
-	log.SetFlags(log.Ldate | log.Ltime)
-	var conf ServerInfo
-	file_locker.Lock()
-	data, err := io.ReadFile(filename) //read config file
-	file_locker.Unlock()
-	if err != nil {
-		log.Println(": read json file error")
-		return conf, false
-	}
-	datajson := []byte(data)
-	err = json.Unmarshal(datajson, &conf)
-	if err != nil {
-		log.Println("unmarshal json file error")
-		return conf, false
-	}
-	return conf, true
-}
-
-func InitConfig() ServerInfo {
-	log.SetFlags(log.Ldate | log.Ltime)
-	dir,_ := os.Getwd()
-	conf, bl := LoadConfig(dir + "/config.json") //get config struct
-	if !bl {
-		log.Println(": Init config file failed")
-		return ServerInfo{"127.0.0.1","8082"}
-	}
-	log.Println(": Init config file successed")
-	return conf
-}
-
 /**
  * StartVoteServer
  * @Description: L'interface pour démarrer la fonction
  * @param IP：ip de serveur
  * @param Port: port de serveur
  */
-func StartVoteServer() {
+func StartVoteServer(IP string, Port string) {
 	banner := "  ___    _    ___  _  _      __     __    _       \n " +
 		"|_ _|  / \\  / _ \\| || |     \\ \\   / /__ | |_ ___ \n  " +
 		"| |  / _ \\| | | | || |_ ____\\ \\ / / _ \\| __/ _ \\\n  " +
@@ -243,7 +203,6 @@ func StartVoteServer() {
 	fmt.Println(banner)
 	log.SetFlags(log.Ldate | log.Ltime)
 	var mutex sync.Mutex
-	s := InitConfig()
-	bs := Ballotagentmanager{mutex, s.IP, s.Port, make(map[string]*Ballotagent), 0}
+	bs := Ballotagentmanager{mutex, IP, Port, make(map[string]*Ballotagent), 0}
 	bs.Start()
 }

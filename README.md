@@ -18,7 +18,7 @@ Gitlab repository : [here](https://gitlab.utc.fr/wanhongz/ia04-vote).
 git clone https://gitlab.utc.fr/wanhongz/ia04-vote.git
 ```
 
-2. Modifiez le fichier de configuration dans le répertoire racine du projet ( **config.json** ), modifiez l'adresse IP et le port de votre serveur ( L'adresse par défaut est **"127.0.0.1:8082"** ).
+2. Modifiez l'adresse IP et le port de votre serveur dans le ficher **main.go** ( L'adresse par défaut est **"127.0.0.1:8082"** ).
 
 3. Compilez avec la commande go build.
 
@@ -39,7 +39,7 @@ go build
 Vous pouvez également utiliser la commande **go install** pour commencer.
 
 ```go
-go install -v gitlab.utc.fr/wanhongz/ia04-vote@latest
+go install -v gitlab.utc.fr/wanhongz/ia04-vote@1.0
 ```
 
 Si tout se passe bien, vous pouvez trouver le fichier exécutable **ia04-vote** dans dossier **bin** sous le chemin **$GOPATH**. 
