@@ -2,7 +2,6 @@ package ballotagent
 
 import (
 	"encoding/json"
-	"fmt"
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/sponsoragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/agt/voteragent"
 	"gitlab.utc.fr/wanhongz/ia04-vote/comsoc"
@@ -208,8 +207,9 @@ func (b *Ballotagent) getNewResultRequest(ID string,w http.ResponseWriter){
  * @Description: minuteur
  */
 func (b* Ballotagent) SetFinished() {
+	log.SetFlags(log.Ldate | log.Ltime)
 	timer := time.After(time.Duration(b.Expiration) * time.Second)
 	<-timer
-	fmt.Println(b.ID + " has finished")
+	log.Println(": " + b.ID + " has finished")
 	b.Isfinish = true
 }

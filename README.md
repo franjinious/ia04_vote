@@ -4,6 +4,8 @@
 
 Un système simple de vote, comprenant des programmes du serveur et des API de support côté client, basé sur un modèle multi-agent, qui peut initier, participer un vote et obtenir des résultats. Il prend en charge plusieurs algorithmes de vote courants.
 
+Gitlab repository : [here](https://gitlab.utc.fr/wanhongz/ia04-vote).
+
 ---
 
 ## Quick Start
@@ -16,7 +18,7 @@ Un système simple de vote, comprenant des programmes du serveur et des API de s
 git clone https://gitlab.utc.fr/wanhongz/ia04-vote.git
 ```
 
-2. Modifiez le fichier de configuration dans le répertoire racine du projet, modifiez l'adresse IP et le port de votre serveur ( L'adresse par défaut est **"127.0.0.1:8082"** ).
+2. Modifiez le fichier de configuration dans le répertoire racine du projet ( **config.json** ), modifiez l'adresse IP et le port de votre serveur ( L'adresse par défaut est **"127.0.0.1:8082"** ).
 
 3. Compilez avec la commande go build.
 
@@ -34,7 +36,7 @@ go build
 
 ### B. Go Install
 
-Vous pouvez également utiliser la commande **go install** pour installer.
+Vous pouvez également utiliser la commande **go install** pour commencer.
 
 ```go
 go install -v gitlab.utc.fr/wanhongz/ia04-vote@latest
