@@ -11,7 +11,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -216,11 +220,34 @@ func LoadConfig(filename string) (ServerInfo, bool) {
 	return conf, true
 }
 
+func currentAbPath() (dir string) {
+	exePath, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dir, _ = filepath.EvalSymlinks(filepath.Dir(exePath))
+	tempDir := os.Getenv("TEMP")
+	if tempDir == "" {
+		tempDir = os.Getenv("TMP")
+	}
+	tDir, _ := filepath.EvalSymlinks(tempDir)
+	if strings.Contains(dir, tDir)  {
+		//return getCurrentAbPathByCaller()
+		var abPath string
+		_, filename, _, ok := runtime.Caller(0)
+		if ok {
+			abPath = path.Dir(filename)
+		}
+		return abPath
+	}
+	return dir
+}
+
 func InitConfig() ServerInfo {
 	log.SetFlags(log.Ldate | log.Ltime)
-	str, _ := os.Getwd()
-	fmt.Println(str)
-	conf, bl := LoadConfig(str + "/config.json") //get config struct
+	dir := currentAbPath()
+	log.Println(dir)
+	conf, bl := LoadConfig(dir + "/config.json") //get config struct
 	if !bl {
 		log.Println("Init config file failed")
 		return ServerInfo{"127.0.0.1","8082"}
