@@ -10,6 +10,7 @@ import (
 	io "io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -217,7 +218,9 @@ func LoadConfig(filename string) (ServerInfo, bool) {
 
 func InitConfig() ServerInfo {
 	log.SetFlags(log.Ldate | log.Ltime)
-	conf, bl := LoadConfig("./config.json") //get config struct
+	str, _ := os.Getwd()
+	fmt.Println(str)
+	conf, bl := LoadConfig(str + "/config.json") //get config struct
 	if !bl {
 		log.Println("Init config file failed")
 		return ServerInfo{"127.0.0.1","8082"}
